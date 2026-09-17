@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SESSION="world-update"
+
+if [[ -z "${TMUX:-}" ]]; then
+    exec tmux new-session -A -s "$SESSION" "$0" "$@"
+fi
+
+pause() {
+    local status=$?
+
+    echo
+    if (( status == 0 )); then
+        echo "Update finished successfully."
+    else
+        echo "Update failed (exit status: $status)."
+    fi
+
+    echo
+    echo "tmux session: $SESSION"
+    echo "Reattach with: tmux attach -t $SESSION"
+    echo
+    echo "Press Enter to close this tmux session..."
+    read -r
+
+    exit "$status"
+}
+trap pause EXIT
+
+# Build the emerge command.
+emerge_cmd=(
+    emerge
+    -avuDN
+    "$@"
+    @world
+)
+
+echo "Starting world update..."
+echo
+echo "tmux session: $SESSION"
+echo "Reattach with: tmux attach -t $SESSION"
+echo
+
+printf 'Running:'
+printf ' %q' \
+    "${emerge_cmd[@]}"
+printf '\n\n'
+
+sudo systemd-inhibit \
+    --what=sleep:idle:shutdown:handle-lid-switch \
+    --mode=block \
+    --who="imatic" \
+    --why="Prevent interruption during world update" \
+    "${emerge_cmd[@]}"

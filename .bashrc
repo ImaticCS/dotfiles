@@ -137,10 +137,17 @@ if command -v fzf >/dev/null 2>&1; then
 fi
 
 # Load distro-specific configuration.
-if [[ -r "$HOME/.config/bash/nixos.bash" ]]; then
-    source "$HOME/.config/bash/nixos.bash"
-elif [[ -r "$HOME/.config/bash/gentoo.bash" ]]; then
-    source "$HOME/.config/bash/gentoo.bash"
+if [[ -r /etc/os-release ]]; then
+    . /etc/os-release
+
+    case "$ID" in
+        nixos)
+            source "$HOME/.config/bash/nixos.bash"
+            ;;
+        gentoo)
+            source "$HOME/.config/bash/gentoo.bash"
+            ;;
+    esac
 fi
 
 fastfetch

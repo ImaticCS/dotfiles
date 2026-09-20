@@ -1,4 +1,4 @@
-alias rebuild='nh os switch --ask ~/nixos -H vm'
+alias rebuild='nh os switch --ask ~/nixos -H "$(hostname -s)"'
 
 case ":$PATH:" in
     *":$HOME/nixos/scripts:"*) ;;
